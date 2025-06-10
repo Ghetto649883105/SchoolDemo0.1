@@ -16,6 +16,7 @@ class AuthHandler:
                                deprecated="auto")
     secret = "SECRET112"
 
+    # 加密密码及验证加密后密码的两个函数,暂时未用
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)  # hash:哈希生成
 
@@ -24,7 +25,7 @@ class AuthHandler:
 
     def encode_token(self, user_id):
         payload = {
-            "exp": datetime.now(timezone.utc) + timedelta(days=0, minutes=60   ),  # exp:过期时间
+            "exp": datetime.now(timezone.utc) + timedelta(days=0, minutes=5),  # exp:过期时间
             "iat": datetime.now(timezone.utc),  # iat:签发时间
             "sub": user_id  # sub:主题,一般为用户id
             # "nbf":  # nbf:生效时间
@@ -42,9 +43,17 @@ class AuthHandler:
             payload = jwt.decode(token, self.secret, algorithms=["HS256"])
             return payload["sub"]
         except jwt.ExpiredSignatureError:  # 过期异常
-            raise HTTPException(status_code=401, detail="过期")  # 向客户端返回HTTP错误响应
+            return {
+                "status": False,
+                "detail": "token过期"
+            }
+            # raise HTTPException(status_code=401, detail="过期")  # 向客户端返回HTTP错误响应
         except jwt.InvalidTokenError:  # 格式异常
-            raise HTTPException(status_code=401, detail="假token")
+            return {
+                "status": False,
+                "detail": "token不正确"
+            }
+            # raise HTTPException(status_code=401, detail="假token")
 
     def auth_wrapper(self, auth: HTTPAuthorizationCredentials = Security(security)):
         return self.decode_token(auth.credentials)

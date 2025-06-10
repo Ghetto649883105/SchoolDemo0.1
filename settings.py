@@ -18,7 +18,7 @@ TORTOISE_ORM = {
         "apps": {
             "models": {
                 "models": ["models",
-                           "aerich.models"],  # 中括号内第一个为模型路径
+                           "aerich.models"],
                 "default_connection": "default",
             }
         },
